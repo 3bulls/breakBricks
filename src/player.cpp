@@ -29,24 +29,62 @@ Block::Block(const sf::Vector2f& size, const sf::Color& color, const sf::Vector2
 
 void Block::updateGameState(Ball &ball, float dt)
 {
-    auto intersection = getGlobalBounds().findIntersection(ball.getGlobalBounds());
+    // 1. 获取两个物体的包围盒
+    auto ballBounds = ball.getGlobalBounds();
+    auto blockBounds = getGlobalBounds();
+
+    // 2. 检测碰撞
+    auto intersection = blockBounds.findIntersection(ballBounds);
+
     if (intersection.has_value())
     {
-        float width = intersection->size.x;
-        float height = intersection->size.y;
-        if (width < height)
+        float overlapWidth = intersection->size.x;
+        float overlapHeight = intersection->size.y;
+        auto dir = ball.getDirection(); // 获取当前方向
+
+        // --- 核心修复逻辑 ---
+
+        if (overlapWidth < overlapHeight)
         {
-            // 水平碰撞，反转水平方向速度
-            auto dir = ball.getDirection();
+            // --- 情况 A: 水平碰撞 (撞了侧面) ---
+            
+            // 1. 反转 X 速度
             dir.x = -dir.x;
             ball.setDirection(dir);
+
+            // 2. 【关键】修正位置：把球推出来
+            // 判断球是在板子的左边还是右边？
+            if (ballBounds.position.x < blockBounds.position.x)
+            {
+                // 球在左边 -> 往左推 overlapWidth
+                ball.move({-overlapWidth, 0.f});
+            }
+            else
+            {
+                // 球在右边 -> 往右推 overlapWidth
+                ball.move({overlapWidth, 0.f});
+            }
         }
         else
         {
-            // 垂直碰撞，反转垂直方向速度
-            auto dir = ball.getDirection();
+            // --- 情况 B: 垂直碰撞 (撞了顶/底) ---
+
+            // 1. 反转 Y 速度
             dir.y = -dir.y;
             ball.setDirection(dir);
+
+            // 2. 【关键】修正位置
+            // 判断球是在板子的上面还是下面？
+            if (ballBounds.position.y < blockBounds.position.y)
+            {
+                // 球在上面 -> 往上推 overlapHeight
+                ball.move({0.f, -overlapHeight});
+            }
+            else
+            {
+                // 球在下面 -> 往下推 overlapHeight
+                ball.move({0.f, overlapHeight});
+            }
         }
     }
 }

@@ -65,17 +65,23 @@ void Map::updateGameState(Ball& ball, float dt)
     for (const auto& wall : wallBlocks)
     {
         auto intersection = wall.getGlobalBounds().findIntersection(ball.getGlobalBounds());
+
         if (intersection.has_value())
         {
-            // 简单处理：反转垂直和水平方向速度
-            auto dir = ball.getDirection();
-            if (wall.getSize().x > wall.getSize().y) // 水平墙壁
+            float overlapWidth = intersection->size.x;
+            float overlapHeight = intersection->size.y;
+            auto dir = ball.getDirection(); // 获取当前方向
+            if (overlapWidth < overlapHeight)
             {
-                dir.y = -dir.y;
-            }
-            else // 垂直墙壁
-            {
+                // 水平碰撞，反转水平方向速度
                 dir.x = -dir.x;
+                ball.move({(ball.getPosition().x < wall.getPosition().x) ? -overlapWidth : overlapWidth, 0.f});
+            }
+            else
+            {
+                // 垂直碰撞，反转垂直方向速度
+                dir.y = -dir.y;
+                ball.move({0.f, (ball.getPosition().y < wall.getPosition().y) ? -overlapHeight : overlapHeight});
             }
             ball.setDirection(dir);
             return;
@@ -96,11 +102,13 @@ void Map::updateGameState(Ball& ball, float dt)
             {
                 // 水平碰撞，反转水平方向速度
                 dir.x = -dir.x;
+                ball.move({(ball.getPosition().x < it->getPosition().x) ? -width : width, 0.f});
             }
             else
             {
                 // 垂直碰撞，反转垂直方向速度
                 dir.y = -dir.y;
+                ball.move({0.f, (ball.getPosition().y < it->getPosition().y) ? -height : height});
             }
             ball.setDirection(dir);
             it = breakableBlocks.erase(it);
