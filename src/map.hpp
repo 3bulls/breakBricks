@@ -23,7 +23,7 @@ public:
     Map();
     Map(sf::Vector2u mapSize);
     Map(const std::vector<sf::RectangleShape>& wallBlocks, const std::vector<sf::RectangleShape>& breakableBlocks, const sf::Vector2u& mapSize = {800, 600});
-    void updateGameState(Ball& ball, float dt);
+    int updateGameState(Ball& ball, float dt);
     ~Map() override = default;
 
 private:

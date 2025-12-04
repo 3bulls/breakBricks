@@ -60,7 +60,7 @@ Map::Map(const std::vector<sf::RectangleShape> &wallBlocks, const std::vector<sf
     this->breakableBlocks = breakableBlocks;
 }
 
-void Map::updateGameState(Ball& ball, float dt)
+int Map::updateGameState(Ball& ball, float dt)
 {
     for (const auto& wall : wallBlocks)
     {
@@ -84,7 +84,7 @@ void Map::updateGameState(Ball& ball, float dt)
                 ball.move({0.f, (ball.getPosition().y < wall.getPosition().y) ? -overlapHeight : overlapHeight});
             }
             ball.setDirection(dir);
-            return;
+            return 0;
         }
     }
 
@@ -112,13 +112,14 @@ void Map::updateGameState(Ball& ball, float dt)
             }
             ball.setDirection(dir);
             it = breakableBlocks.erase(it);
-            return;
+            return 1;
         }
         else
         {
             ++it;
         }
     }
+    return 0;
 }
 
 void Map::draw(sf::RenderTarget &target, sf::RenderStates states) const

@@ -22,7 +22,7 @@ public:
     sf::Vector2f getDirection() const { return direction; }
     
     void updatePosition(float dt);
-    void updateGameState(float dt);
+    bool updateGameState(float dt, float validY);
 private:
 
 };
@@ -52,11 +52,12 @@ public:
     std::unique_ptr<Block> block;
     std::unique_ptr<Ball> ball;
     std::shared_ptr<Map> map;
+    int score = 0;
 
     Player(Map& map);
     Player(Block& block,Ball& ball, Map& map);
 
-    void updateGameState(float dt);
+    bool updateGameState(float dt);
     void handleInput(float dt);
     ~Player() override = default;
 private:

@@ -130,9 +130,14 @@ void Ball::updatePosition(float dt)
     move(direction * speed * dt);
 }
 
-void Ball::updateGameState(float dt)
+bool Ball::updateGameState(float dt, float validY)
 {
     updatePosition(dt);
+    if (getPosition().y > validY)
+    {
+        return false; // 掉出界外，游戏结束
+    }
+    return true; // 继续游戏
 }
 
 // Player Class Implementation
@@ -150,11 +155,12 @@ Player::Player(Block& block,Ball& ball, Map& map)
     this->map = std::make_shared<Map>(map);
 }
 
-void Player::updateGameState(float dt)
+bool Player::updateGameState(float dt)
 {
-    map->updateGameState(*ball, dt);
+    int scoreIncrement = map->updateGameState(*ball, dt);
+    score += scoreIncrement;
     block->updateGameState(*ball, dt);
-    ball->updateGameState(dt);
+    return ball->updateGameState(dt,block->getPosition().y);
 }
 
 void Player::handleInput(float dt)
